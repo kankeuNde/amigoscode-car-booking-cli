@@ -6,6 +6,7 @@ import com.kankeu.user.User;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 public class CarBooking {
@@ -93,5 +94,30 @@ public class CarBooking {
 
     public void setBookedAt(LocalDateTime bookedAt) {
         this.bookedAt = bookedAt;
+    }
+
+    @Override
+    public String toString() {
+        return "CarBooking{" +
+                "id=" + id +
+                ", user=" + user +
+                ", car=" + car +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
+                ", price=" + price +
+                ", status=" + status +
+                ", bookedAt=" + bookedAt +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof CarBooking that)) return false;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }
