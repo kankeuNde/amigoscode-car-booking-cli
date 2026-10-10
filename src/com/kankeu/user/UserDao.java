@@ -5,16 +5,14 @@ import com.kankeu.exceptions.UserNotFoundException;
 
 
 public class UserDao {
-    private Integer initialCapacity;
-    private Integer offset;
-    private User[] users;
-    private int currentPos;
+    private static User[] users;
+    private static int size;
+    private static int capacity;
 
-    public UserDao(Integer initialCapacity) {
-        this.initialCapacity = initialCapacity;
-        this.users = new User[initialCapacity];
-        this.offset = 1;
-        this.currentPos = 0;
+    public UserDao(int initialCapacity) {
+        capacity = initialCapacity;
+        users = new User[capacity];
+        size = 0;
     }
     //create user
     //search a user
@@ -22,9 +20,20 @@ public class UserDao {
     //delete a user
 
     public User addUser(User user){
-        users[currentPos] = user;
-        currentPos++;
+        if(size == capacity){
+            users = resize(capacity);
+        }
+        users[size++] = user;
         return user;
+    }
+
+    private static User[] resize(int capacity){
+        capacity *= 2;
+        User[] newUsers = new User[capacity];
+        for(int i = 0; i < size; i++){
+            newUsers[i] = users[i];
+        }
+        return  newUsers;
     }
 
     /**
@@ -83,7 +92,7 @@ public class UserDao {
 
     public void deleteUser(Integer id) throws UserNotFoundException {
         int index = this.findUserById(id);
-        for(int i=index; i<currentPos; i++){
+        for(int i = index; i< size; i++){
             users[i] = users[i+1];
         }
     }
