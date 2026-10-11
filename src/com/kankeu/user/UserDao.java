@@ -97,6 +97,10 @@ public class UserDao {
         }
     }
 
+    public User[] getUsers(){
+        return users;
+    }
+
 
 
 }
