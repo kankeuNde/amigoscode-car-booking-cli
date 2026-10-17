@@ -23,6 +23,7 @@ public class CarBooking {
 
     public CarBooking(Car car, User user, LocalDate startDate,
                       LocalDate endDate, BigDecimal price, BookingStatus status){
+        this.id = UUID.randomUUID();
         this.car = car;
         this.user = user;
         this.startDate = startDate;

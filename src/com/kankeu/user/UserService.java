@@ -1,5 +1,7 @@
 package com.kankeu.user;
 
+import com.kankeu.exceptions.UserNotFoundException;
+
 import java.util.UUID;
 
 public class UserService {
@@ -7,6 +9,10 @@ public class UserService {
 
     public UserService(UserDao userDao) {
         this.userDao = userDao;
+    }
+
+    public User findByID(UUID userID) throws UserNotFoundException {
+        return userDao.findUserById(userID);
     }
 
     public User createUser(String name){
@@ -17,5 +23,13 @@ public class UserService {
 
     public User[] getAllUsers(){
         return userDao.getUsers();
+    }
+
+    public boolean exists(UUID uuid) {
+        for(User user : userDao.getUsers()){
+            if(user.getId().equals(uuid))
+                return true;
+        }
+        return false;
     }
 }

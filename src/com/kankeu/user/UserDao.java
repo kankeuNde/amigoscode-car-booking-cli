@@ -3,6 +3,8 @@ package com.kankeu.user;
 import com.kankeu.exceptions.NonExistingUserException;
 import com.kankeu.exceptions.UserNotFoundException;
 
+import java.util.UUID;
+
 
 public class UserDao {
     private static User[] users;
@@ -51,10 +53,10 @@ public class UserDao {
         throw new UserNotFoundException("user %s not found".format(username));
     }
 
-    public int findUserById(int id) throws UserNotFoundException{
-        for(int i = 0; i<users.length; i++){
-            if(users[i].getId().equals(id)){
-                return i;
+    public User findUserById(UUID id) throws UserNotFoundException{
+        for (User user : users) {
+            if (user.getId().equals(id)) {
+                return user;
             }
         }
         throw new UserNotFoundException("User with id %s not found".format(String.valueOf(id)));
@@ -80,21 +82,19 @@ public class UserDao {
      * @return User of throws exception if not exists
      * @throws NonExistingUserException
      */
-    public User updateUser(User newUser){
-        try{
-            int index = this.getUserIndex(newUser);
-            users[index] = newUser;
-        } catch (UserNotFoundException e){
-            e.printStackTrace();
-        }
+    public User updateUser(User newUser) throws UserNotFoundException {
+        int index = this.getUserIndex(newUser);
+        users[index] = newUser;
         return newUser;
     }
 
-    public void deleteUser(Integer id) throws UserNotFoundException {
-        int index = this.findUserById(id);
+    public void deleteUser(UUID id) throws UserNotFoundException {
+        User user = this.findUserById(id);
+        int index = this.getUserIndex(user);
         for(int i = index; i< size; i++){
             users[i] = users[i+1];
         }
+        size--;
     }
 
     public User[] getUsers(){

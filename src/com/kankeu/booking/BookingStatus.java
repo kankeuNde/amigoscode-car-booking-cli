@@ -2,6 +2,6 @@ package com.kankeu.booking;
 
 public enum BookingStatus {
     ACTIVE,
-    CANCELLED,
+    CANCELED,
     COMPLETED
 }
