@@ -27,7 +27,7 @@ public class UserService {
 
     public boolean exists(UUID uuid) {
         for(User user : userDao.getUsers()){
-            if(user.getId().equals(uuid))
+            if(user!= null && user.getId().equals(uuid))
                 return true;
         }
         return false;

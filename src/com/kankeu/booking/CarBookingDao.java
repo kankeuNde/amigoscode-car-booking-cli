@@ -19,10 +19,6 @@ public class CarBookingDao {
         size = 0;
     }
 
-    //create
-    //update
-    //search
-    //delete
     public CarBooking createBooking(CarBooking carBooking){
         if(size >= capacity){
             carBookings = resize(capacity);
@@ -38,7 +34,7 @@ public class CarBookingDao {
                 return i;
             }
         }
-        throw new BookingNotFoundException("Booking %s not found.".format(String.valueOf(id)));
+        throw new BookingNotFoundException("Booking %s not found.".formatted(id));
     }
 
     public CarBooking updateCarBooking(CarBooking carBooking) throws BookingNotFoundException {

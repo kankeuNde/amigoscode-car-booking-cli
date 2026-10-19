@@ -56,8 +56,8 @@ public class Main {
                 Options menu:
                 [1] - Book Car
                 [2] - Delete Booking
-                [3] - View all Bookings
-                [4] - View all User Booked Cars
+                [3] - View all User Booked Cars
+                [4] - View all Bookings
                 [5] - View Available Cars
                 [6] - View Available Electric Cars
                 [7] - View All Users
@@ -101,7 +101,8 @@ public class Main {
                     try {
                         car = carService.findByID(carID);
                     } catch (CarNotFoundException e) {
-                        throw new RuntimeException(e);
+                        e.printStackTrace();
+                        break;
                     }
                     System.out.println("Enter the start and end dates in the following format: YYYY-MM-DD");
                     System.out.println("Start date:");
@@ -109,20 +110,10 @@ public class Main {
 
                     System.out.println("End date:");
                     LocalDate endDate = LocalDate.parse(scanner.nextLine(), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-                    if(startDate.isBefore(LocalDate.now()) || endDate.isBefore(startDate)){
-                        throw new IllegalArgumentException("Start date must not be before today and must be before end date");
+                    CarBooking carBooking = carBookingService.bookCar(startDate, endDate, car, user);
+                    if(carBooking != null){
+                        System.out.println(carBooking);
                     }
-                    allBookings = carBookingService.getAllBookings();
-                    if(!carBookingService.isAvailable(allBookings, car)) {
-                        System.out.println("The chosen car is not available.");
-                        break;
-                    }
-                    long days = ChronoUnit.DAYS.between(startDate, endDate);
-                    BigDecimal price = car.getRentalPricePerDay().multiply(BigDecimal.valueOf(days));
-
-                    CarBooking booking = new CarBooking(car, user, startDate, endDate, price, BookingStatus.ACTIVE);
-                    CarBooking carBooking = carBookingService.createBooking(booking);
-                    System.out.println(carBooking);
                     break;
                 case 2:
                     System.out.print("Enter the booking ID:");
@@ -130,19 +121,20 @@ public class Main {
                     if(carBookingService.isActive(id)) {
                         carBookingService.delete(id);
                     }else{
-                        throw new RuntimeException("The booking ID is invalid");
+                        System.out.println("The booking ID is invalid");
                     }
-
                     break;
                 case 3:
-                    System.out.println("User Booked Cars:");
+                    System.out.println("User Bookings:");
                     System.out.print("Enter your user ID:");
                     UUID uuid = UUID.fromString(scanner.nextLine());
                     Car[] bookedCars = null;
                     if(userService.exists(uuid))
                         bookedCars = carBookingService.userBookedCars(uuid);
-                    else
-                        throw new RuntimeException("The user ID is invalid");
+                    else {
+                        System.out.println("The user ID is invalid");
+                        break;
+                    }
                     if(bookedCars != null){
                         for(Car bookedCar : bookedCars){
                             System.out.println(bookedCar);
@@ -175,7 +167,7 @@ public class Main {
                     try {
                         availableElectricCars = carService.getAvailableElectricCars();
                     } catch (CarNotFoundException e) {
-                        throw new RuntimeException(e);
+                        e.printStackTrace();
                     }
                     for(Car availableElectricCar : availableElectricCars){
                         System.out.println(availableElectricCar);

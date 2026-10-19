@@ -16,11 +16,6 @@ public class CarDao {
         size = 0;
     }
 
-    //create Car
-    //read Car
-    //update Car
-    //delete Car
-
     public Car createCar(Car car){
         if(size >= capacity){
             cars = resize(capacity);
@@ -35,7 +30,7 @@ public class CarDao {
                 return i;
             }
         }
-        throw new CarNotFoundException("Car %s not found.".format(regNumber));
+        throw new CarNotFoundException("Car %s not found.".formatted(regNumber));
     }
 
     public Car updateCar(Car car) throws CarNotFoundException {

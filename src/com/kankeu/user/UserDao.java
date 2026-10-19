@@ -16,10 +16,6 @@ public class UserDao {
         users = new User[capacity];
         size = 0;
     }
-    //create user
-    //search a user
-    //modify a user
-    //delete a user
 
     public User addUser(User user){
         if(size == capacity){
@@ -46,20 +42,20 @@ public class UserDao {
      */
     public User findByUsername(String username) throws UserNotFoundException{
         for(User user : users){
-            if(user.getName().equals(username)){
+            if(user != null && user.getName().equals(username)){
                 return user;
             }
         }
-        throw new UserNotFoundException("user %s not found".format(username));
+        throw new UserNotFoundException("user %s not found".formatted(username));
     }
 
     public User findUserById(UUID id) throws UserNotFoundException{
         for (User user : users) {
-            if (user.getId().equals(id)) {
+            if (user != null && user.getId().equals(id)) {
                 return user;
             }
         }
-        throw new UserNotFoundException("User with id %s not found".format(String.valueOf(id)));
+        throw new UserNotFoundException("User with id %s not found".formatted(id));
     }
 
     /**
@@ -73,7 +69,7 @@ public class UserDao {
                 return i;
             }
         }
-        throw new UserNotFoundException("user %s not found".format(user.toString()));
+        throw new UserNotFoundException("user %s not found".formatted(user));
     }
 
     /**

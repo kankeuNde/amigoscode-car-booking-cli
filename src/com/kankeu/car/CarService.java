@@ -54,7 +54,7 @@ public class CarService {
     public Car findByID(UUID carID) throws CarNotFoundException {
         Car[] cars = carDao.getAllCars();
         for (Car car : cars) {
-            if(car.getId().equals(carID)){
+            if(car != null && car.getId().equals(carID)){
                 return car;
             }
         }
@@ -70,6 +70,6 @@ public class CarService {
                 availableElectricCars[index++] = availableCar;
             }
         }
-        return availableElectricCars;
+        return Arrays.copyOf(availableElectricCars, index);
     }
 }
