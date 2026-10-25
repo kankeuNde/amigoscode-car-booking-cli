@@ -1,6 +1,7 @@
 package com.kankeu.car;
 
 import com.kankeu.booking.BookingStatus;
+import com.kankeu.booking.CarBookingArrayDataAccessService;
 import com.kankeu.booking.CarBookingDao;
 import com.kankeu.exceptions.CarNotFoundException;
 
@@ -8,12 +9,12 @@ import java.util.Arrays;
 import java.util.UUID;
 
 public class CarService {
-    private CarDao  carDao;
+    private CarDao carDao;
     private CarBookingDao carBookingDao;
     private static Car[] allAvailableCars;
 
-    public CarService(CarDao carDao,  CarBookingDao carBookingDao) {
-        this.carDao = carDao;
+    public CarService(CarArrayDataAccessService carArrayDataAccessService, CarBookingArrayDataAccessService carBookingDao) {
+        this.carDao = carArrayDataAccessService;
         this.carBookingDao = carBookingDao;
     }
 
@@ -23,12 +24,12 @@ public class CarService {
     }
 
     public Car[] getAllCars(){
-        return  carDao.getAllCars();
+        return  carDao.getCars();
     }
 
     public Car[] getAllAvailableCars() throws CarNotFoundException {
         Car[] unAvailableCars = carBookingDao.getCarByBookingStatus(BookingStatus.ACTIVE);
-        Car[] allCars = carDao.getAllCars();
+        Car[] allCars = carDao.getCars();
         allAvailableCars = filterCars(allCars, unAvailableCars);
         return allAvailableCars;
     }
@@ -52,7 +53,7 @@ public class CarService {
     }
 
     public Car findByID(UUID carID) throws CarNotFoundException {
-        Car[] cars = carDao.getAllCars();
+        Car[] cars = carDao.getCars();
         for (Car car : cars) {
             if(car != null && car.getId().equals(carID)){
                 return car;

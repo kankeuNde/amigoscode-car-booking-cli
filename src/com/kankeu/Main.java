@@ -1,23 +1,21 @@
 package com.kankeu;
 
-import com.kankeu.booking.BookingStatus;
 import com.kankeu.booking.CarBooking;
-import com.kankeu.booking.CarBookingDao;
+import com.kankeu.booking.CarBookingArrayDataAccessService;
 import com.kankeu.booking.CarBookingService;
 import com.kankeu.car.Brand;
 import com.kankeu.car.Car;
-import com.kankeu.car.CarDao;
+import com.kankeu.car.CarArrayDataAccessService;
 import com.kankeu.car.CarService;
 import com.kankeu.exceptions.CarNotFoundException;
 import com.kankeu.exceptions.UserNotFoundException;
 import com.kankeu.user.User;
-import com.kankeu.user.UserDao;
+import com.kankeu.user.UserArrayDataAccessService;
 import com.kankeu.user.UserService;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.Scanner;
 import java.util.UUID;
 
@@ -25,16 +23,16 @@ public class Main {
     private static UserService userService;
     private static CarBookingService carBookingService;
     private static CarService carService;
-    private static UserDao userDao;
-    private static CarBookingDao carBookingDao;
-    private static CarDao carDao;
+    private static UserArrayDataAccessService userArrayDataAccessService;
+    private static CarBookingArrayDataAccessService carBookingDao;
+    private static CarArrayDataAccessService carArrayDataAccessService;
 
     static{
-        userDao = new UserDao(20);
-        userService = new UserService(userDao);
-        carDao = new CarDao(20);
-        carBookingDao = new CarBookingDao(20);
-        carService = new CarService(carDao,  carBookingDao);
+        userArrayDataAccessService = new UserArrayDataAccessService(20);
+        userService = new UserService(userArrayDataAccessService);
+        carArrayDataAccessService = new CarArrayDataAccessService(20);
+        carBookingDao = new CarBookingArrayDataAccessService(20);
+        carService = new CarService(carArrayDataAccessService,  carBookingDao);
         carBookingService = new CarBookingService(carBookingDao);
 
         Car honda =  new Car(UUID.randomUUID(), "hen-57883m-yjmemme", BigDecimal.TEN, Brand.HONDA, false);
@@ -45,8 +43,8 @@ public class Main {
         carService.addCar(toyota);
         carService.addCar(Tesla);
 
-        userService.createUser("James");
-        userService.createUser("John");
+        userService.addUser("James");
+        userService.addUser("John");
 
     }
 
@@ -80,7 +78,6 @@ public class Main {
 
                     System.out.println("Enter your user ID");
                     UUID userID = UUID.fromString(scanner.nextLine());
-                    //scanner.nextLine();
                     User user = null;
                     try {
                         user = userService.findByID(userID);
@@ -96,7 +93,6 @@ public class Main {
 
                     System.out.println("Enter your car selection number:");
                     UUID carID = UUID.fromString(scanner.nextLine());
-                    //scanner.nextLine();
                     Car car = null;
                     try {
                         car = carService.findByID(carID);

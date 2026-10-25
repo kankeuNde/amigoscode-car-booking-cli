@@ -15,12 +15,12 @@ import static com.kankeu.booking.BookingStatus.CANCELED;
 public class CarBookingService {
     private CarBookingDao carBookingDao;
 
-    public CarBookingService(CarBookingDao carBookingDao) {
+    public CarBookingService(CarBookingArrayDataAccessService carBookingDao) {
         this.carBookingDao = carBookingDao;
     }
 
     public CarBooking[]  getAllBookings(){
-        return carBookingDao.getAllCarBookings();
+        return carBookingDao.getBookings();
     }
 
 
@@ -33,12 +33,12 @@ public class CarBookingService {
         return true;
     }
 
-    public CarBooking createBooking(CarBooking carBooking){
-        return carBookingDao.createBooking(carBooking);
+    public void createBooking(CarBooking carBooking){
+        carBookingDao.saveBooking(carBooking);
     }
 
     public CarBooking findById(UUID id) throws BookingNotFoundException{
-        for(CarBooking carBooking : carBookingDao.getAllCarBookings()) {
+        for(CarBooking carBooking : carBookingDao.getBookings()) {
             if(carBooking.getId().equals(id)){
                 return carBooking;
             }
@@ -47,7 +47,7 @@ public class CarBookingService {
     }
 
     public void delete(UUID id) {
-        for(CarBooking carBooking : carBookingDao.getAllCarBookings()) {
+        for(CarBooking carBooking : carBookingDao.getBookings()) {
             if(carBooking != null && carBooking.getId().equals(id)) {
                 carBooking.setStatus(CANCELED);
             }
@@ -55,7 +55,7 @@ public class CarBookingService {
     }
 
     public boolean isActive(UUID id) {
-        for(CarBooking carBooking : carBookingDao.getAllCarBookings()) {
+        for(CarBooking carBooking : carBookingDao.getBookings()) {
             if(carBooking != null && carBooking.getId().equals(id) && carBooking.getStatus().equals(BookingStatus.ACTIVE)) {
                 return true;
             }
@@ -64,7 +64,7 @@ public class CarBookingService {
     }
 
     public Car[] userBookedCars(UUID id) {
-        CarBooking[] allCarBookings = carBookingDao.getAllCarBookings();
+        CarBooking[] allCarBookings = carBookingDao.getBookings();
         Car[] cars = new Car[allCarBookings.length];
         int index = 0;
         for(CarBooking carBooking : allCarBookings) {
@@ -89,7 +89,7 @@ public class CarBookingService {
         BigDecimal price = car.getRentalPricePerDay().multiply(BigDecimal.valueOf(days));
 
         CarBooking booking = new CarBooking(car, user, startDate, endDate, price, BookingStatus.ACTIVE);
-        CarBooking carBooking = createBooking(booking);
-        return carBooking;
+        createBooking(booking);
+        return booking;
     }
 }
