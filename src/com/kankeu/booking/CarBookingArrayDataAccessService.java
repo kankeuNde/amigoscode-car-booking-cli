@@ -1,7 +1,6 @@
 package com.kankeu.booking;
 
 import com.kankeu.car.Car;
-import com.kankeu.exceptions.BookingNotFoundException;
 
 import java.util.UUID;
 

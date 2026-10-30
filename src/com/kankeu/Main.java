@@ -1,17 +1,10 @@
 package com.kankeu;
 
-import com.kankeu.booking.CarBooking;
-import com.kankeu.booking.CarBookingArrayDataAccessService;
-import com.kankeu.booking.CarBookingService;
-import com.kankeu.car.Brand;
-import com.kankeu.car.Car;
-import com.kankeu.car.CarArrayDataAccessService;
-import com.kankeu.car.CarService;
+import com.kankeu.booking.*;
+import com.kankeu.car.*;
 import com.kankeu.exceptions.CarNotFoundException;
 import com.kankeu.exceptions.UserNotFoundException;
-import com.kankeu.user.User;
-import com.kankeu.user.UserArrayDataAccessService;
-import com.kankeu.user.UserService;
+import com.kankeu.user.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -23,16 +16,22 @@ public class Main {
     private static UserService userService;
     private static CarBookingService carBookingService;
     private static CarService carService;
-    private static UserArrayDataAccessService userArrayDataAccessService;
-    private static CarBookingArrayDataAccessService carBookingDao;
-    private static CarArrayDataAccessService carArrayDataAccessService;
+    private static UserDao userDao;
+    private static CarBookingDao carBookingDao;
+    private static CarDao carDao;
 
     static{
-        userArrayDataAccessService = new UserArrayDataAccessService(20);
-        userService = new UserService(userArrayDataAccessService);
-        carArrayDataAccessService = new CarArrayDataAccessService(20);
-        carBookingDao = new CarBookingArrayDataAccessService(20);
-        carService = new CarService(carArrayDataAccessService,  carBookingDao);
+        //userDao = new UserArrayDataAccessService(20);
+        userDao = new UserFileDataAccessService("C:\\Users\\Lenovo\\Documents\\java training\\projects-workspace\\car-booking-cli\\data\\users.dat");
+        userService = new UserService(userDao);
+
+        //carDao = new CarArrayDataAccessService(20);
+        carDao = new CarFileDataAccessService("C:\\Users\\Lenovo\\Documents\\java training\\projects-workspace\\car-booking-cli\\data\\cars.dat");
+
+        //carBookingDao = new CarBookingArrayDataAccessService(20);
+        carBookingDao = new CarBookingFileDataAccessService("C:\\Users\\Lenovo\\Documents\\java training\\projects-workspace\\car-booking-cli\\data\\bookings.dat");
+
+        carService = new CarService(carDao,  carBookingDao);
         carBookingService = new CarBookingService(carBookingDao);
 
         Car honda =  new Car(UUID.randomUUID(), "hen-57883m-yjmemme", BigDecimal.TEN, Brand.HONDA, false);

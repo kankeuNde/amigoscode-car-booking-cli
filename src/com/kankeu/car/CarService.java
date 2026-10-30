@@ -1,7 +1,6 @@
 package com.kankeu.car;
 
 import com.kankeu.booking.BookingStatus;
-import com.kankeu.booking.CarBookingArrayDataAccessService;
 import com.kankeu.booking.CarBookingDao;
 import com.kankeu.exceptions.CarNotFoundException;
 
@@ -13,8 +12,8 @@ public class CarService {
     private CarBookingDao carBookingDao;
     private static Car[] allAvailableCars;
 
-    public CarService(CarArrayDataAccessService carArrayDataAccessService, CarBookingArrayDataAccessService carBookingDao) {
-        this.carDao = carArrayDataAccessService;
+    public CarService(CarDao carDao, CarBookingDao carBookingDao) {
+        this.carDao = carDao;
         this.carBookingDao = carBookingDao;
     }
 

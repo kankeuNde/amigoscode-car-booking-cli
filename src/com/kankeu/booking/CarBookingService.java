@@ -15,7 +15,7 @@ import static com.kankeu.booking.BookingStatus.CANCELED;
 public class CarBookingService {
     private CarBookingDao carBookingDao;
 
-    public CarBookingService(CarBookingArrayDataAccessService carBookingDao) {
+    public CarBookingService(CarBookingDao carBookingDao) {
         this.carBookingDao = carBookingDao;
     }
 
