@@ -15,10 +15,9 @@ public class UserService {
         return userDao.findUserById(userID);
     }
 
-    public User createUser(String name){
+    public User addUser(String name){
         User user = new User(UUID.randomUUID(), name);
-        userDao.addUser(user);
-        return user;
+        return userDao.createUser(user);
     }
 
     public User[] getAllUsers(){

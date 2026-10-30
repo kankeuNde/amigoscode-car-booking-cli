@@ -8,11 +8,11 @@ import java.util.Arrays;
 import java.util.UUID;
 
 public class CarService {
-    private CarDao  carDao;
+    private CarDao carDao;
     private CarBookingDao carBookingDao;
     private static Car[] allAvailableCars;
 
-    public CarService(CarDao carDao,  CarBookingDao carBookingDao) {
+    public CarService(CarDao carDao, CarBookingDao carBookingDao) {
         this.carDao = carDao;
         this.carBookingDao = carBookingDao;
     }
@@ -23,12 +23,12 @@ public class CarService {
     }
 
     public Car[] getAllCars(){
-        return  carDao.getAllCars();
+        return  carDao.getCars();
     }
 
     public Car[] getAllAvailableCars() throws CarNotFoundException {
         Car[] unAvailableCars = carBookingDao.getCarByBookingStatus(BookingStatus.ACTIVE);
-        Car[] allCars = carDao.getAllCars();
+        Car[] allCars = carDao.getCars();
         allAvailableCars = filterCars(allCars, unAvailableCars);
         return allAvailableCars;
     }
@@ -52,7 +52,7 @@ public class CarService {
     }
 
     public Car findByID(UUID carID) throws CarNotFoundException {
-        Car[] cars = carDao.getAllCars();
+        Car[] cars = carDao.getCars();
         for (Car car : cars) {
             if(car != null && car.getId().equals(carID)){
                 return car;
