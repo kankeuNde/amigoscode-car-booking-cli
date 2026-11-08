@@ -1,8 +1,11 @@
 package com.kankeu.booking;
 
 import com.kankeu.car.Car;
+import com.kankeu.exceptions.BookingNotFoundException;
 
 import java.util.UUID;
+
+import static com.kankeu.booking.BookingStatus.CANCELED;
 
 public class CarBookingArrayDataAccessService implements CarBookingDao {
     private static CarBooking[]  carBookings;
@@ -28,29 +31,30 @@ public class CarBookingArrayDataAccessService implements CarBookingDao {
     }
 
     @Override
-    public CarBooking findBookingById(UUID id) {
+    public CarBooking findBookingById(UUID id) throws BookingNotFoundException {
         for(CarBooking carBooking : carBookings){
-            if(carBooking.getId().equals(id)){
+            if(carBooking != null && carBooking.getId().equals(id)){
                 return carBooking;
             }
         }
-        return null;
+        throw new BookingNotFoundException("Booking with id %s not found".formatted(id));
     }
-//
-//    public CarBooking updateCarBooking(CarBooking carBooking) throws BookingNotFoundException {
-//        int bookingId = findBookingById(carBooking.getId());
-//        carBookings[bookingId] = carBooking;
-//        return carBooking;
-//    }
+
 
     @Override
     public void deleteBooking(UUID bookingId) {
-        CarBooking booking = findBookingById(bookingId);
-        for(int i = 0; i< size; i++){
-            if(carBookings[i].equals(booking)){
-                carBookings[i] = null;
+        CarBooking booking = null;
+        try {
+            booking = findBookingById(bookingId);
+            for(int i = 0; i< size; i++){
+                if(carBookings[i].equals(booking)){
+                    carBookings[i] = null;
+                }
             }
+        } catch (BookingNotFoundException e) {
+            e.printStackTrace();
         }
+
     }
 
     public Car[] getCarByBookingStatus(BookingStatus status){
@@ -62,6 +66,17 @@ public class CarBookingArrayDataAccessService implements CarBookingDao {
             }
         }
         return cars;
+    }
+
+    @Override
+    public void cancelBooking(UUID bookingId) {
+        CarBooking[] bookings = getBookings();
+        for(CarBooking carBooking : bookings) {
+            if(carBooking != null && carBooking.getId().equals(bookingId)) {
+                carBooking.setStatus(CANCELED);
+                break;
+            }
+        }
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.kankeu.booking;
 
 import com.kankeu.car.Car;
+import com.kankeu.exceptions.BookingNotFoundException;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -8,6 +9,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.UUID;
+
+import static com.kankeu.booking.BookingStatus.CANCELED;
 
 public class CarBookingFileDataAccessService implements CarBookingDao{
     private final String filePath;
@@ -22,14 +25,14 @@ public class CarBookingFileDataAccessService implements CarBookingDao{
     }
 
     @Override
-    public CarBooking findBookingById(UUID bookingId) {
+    public CarBooking findBookingById(UUID bookingId) throws BookingNotFoundException {
         CarBooking[] carBookings = readAll();
         for(CarBooking carBooking:carBookings){
             if(carBooking.getId().equals(bookingId)){
                 return carBooking;
             }
         }
-        return null;
+        throw new BookingNotFoundException("Booking with id %s not found".formatted(bookingId));
     }
 
     @Override
@@ -37,6 +40,10 @@ public class CarBookingFileDataAccessService implements CarBookingDao{
         CarBooking[] carBookings = readAll();
         CarBooking[] updatedCarBookings = addCarBooking(carBookings, carBooking);
         writeAll(updatedCarBookings);
+    }
+
+    public void updateBookins(CarBooking[] bookings) {
+        writeAll(bookings);
     }
 
 
@@ -91,8 +98,18 @@ public class CarBookingFileDataAccessService implements CarBookingDao{
 
     @Override
     public void deleteBooking(UUID bookingId) {
-
+        CarBooking[]  bookings = readAll();
+        for(int index = 0; index < bookings.length; index++){
+            if(bookings[index].getId().equals(bookingId)){
+                for(int i=index; i<bookings.length-1; i++){
+                    bookings[i] = bookings[i+1];
+                }
+                break;
+            }
+        }
+        writeAll(bookings);
     }
+
 
     @Override
     public Car[] getCarByBookingStatus(BookingStatus bookingStatus) {
@@ -105,5 +122,17 @@ public class CarBookingFileDataAccessService implements CarBookingDao{
             }
         }
         return Arrays.copyOf(result, j);
+    }
+
+    @Override
+    public void cancelBooking(UUID bookingId) {
+        CarBooking[] bookings = getBookings();
+        for(CarBooking carBooking : bookings) {
+            if(carBooking != null && carBooking.getId().equals(bookingId)) {
+                carBooking.setStatus(CANCELED);
+                break;
+            }
+        }
+        writeAll(bookings);
     }
 }

@@ -1,5 +1,7 @@
 package com.kankeu.user;
 
+import com.kankeu.exceptions.UserNotFoundException;
+
 import java.util.UUID;
 
 public class UserArrayDataAccessService implements UserDao {
@@ -23,13 +25,13 @@ public class UserArrayDataAccessService implements UserDao {
     }
 
     @Override
-    public User findUserById(UUID id) {
+    public User findUserById(UUID id) throws UserNotFoundException {
         for (User user : users) {
             if (user != null && user.getId().equals(id)) {
                 return user;
             }
         }
-        return null;
+        throw new UserNotFoundException("user with %d not found".formatted(id));
     }
 
     /**
@@ -45,12 +47,18 @@ public class UserArrayDataAccessService implements UserDao {
 
     @Override
     public void deleteUser(UUID id) {
-        User user = this.findUserById(id);
-        int index = this.getUserIndex(user);
-        for(int i = index; i< size; i++){
-            users[i] = users[i+1];
+        User user = null;
+        try {
+            user = this.findUserById(id);
+            int index = this.getUserIndex(user);
+            for(int i = index; i< size; i++){
+                users[i] = users[i+1];
+            }
+            size--;
+        } catch (UserNotFoundException e) {
+            e.printStackTrace();
         }
-        size--;
+
     }
 
     @Override

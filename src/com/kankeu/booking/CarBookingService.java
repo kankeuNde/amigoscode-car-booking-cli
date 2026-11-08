@@ -47,7 +47,8 @@ public class CarBookingService {
     }
 
     public void delete(UUID id) {
-        for(CarBooking carBooking : carBookingDao.getBookings()) {
+        CarBooking[] bookings = carBookingDao.getBookings();
+        for(CarBooking carBooking : bookings) {
             if(carBooking != null && carBooking.getId().equals(id)) {
                 carBooking.setStatus(CANCELED);
             }

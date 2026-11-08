@@ -1,6 +1,6 @@
 package com.kankeu.user;
 
-import com.kankeu.car.Car;
+import com.kankeu.exceptions.UserNotFoundException;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -20,14 +20,14 @@ public class UserFileDataAccessService implements UserDao{
     }
 
     @Override
-    public User findUserById(UUID userId) {
+    public User findUserById(UUID userId) throws UserNotFoundException {
         User[] users = readAll();
         for(User user : users){
             if(user.getId().equals(userId)){
                 return user;
             }
         }
-        return null;
+        throw new UserNotFoundException("user with %d not found".formatted(userId));
     }
 
     @Override
@@ -56,16 +56,13 @@ public class UserFileDataAccessService implements UserDao{
         User[] users = readAll();
         for(int index = 0; index < users.length; index++){
             if(users[index].getId().equals(userId)){
-                remove(index);
+                for(int i=index; i<users.length-1; i++){
+                    users[i] = users[i+1];
+                }
+                break;
             }
         }
-    }
-
-    private void remove(int index){
-        User[] users = readAll();
-        for(int i=index; i<users.length-1; i++){
-            users[i] = users[i+1];
-        }
+        writeAll(users);
     }
 
     private void writeAll(User[] users){

@@ -6,7 +6,10 @@ import com.kankeu.exceptions.CarNotFoundException;
 import com.kankeu.exceptions.UserNotFoundException;
 import com.kankeu.user.*;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
@@ -19,36 +22,13 @@ public class Main {
     private static UserDao userDao;
     private static CarBookingDao carBookingDao;
     private static CarDao carDao;
-
-    static{
-        //userDao = new UserArrayDataAccessService(20);
-        userDao = new UserFileDataAccessService("C:\\Users\\Lenovo\\Documents\\java training\\projects-workspace\\car-booking-cli\\data\\users.dat");
-        userService = new UserService(userDao);
-
-        //carDao = new CarArrayDataAccessService(20);
-        carDao = new CarFileDataAccessService("C:\\Users\\Lenovo\\Documents\\java training\\projects-workspace\\car-booking-cli\\data\\cars.dat");
-
-        //carBookingDao = new CarBookingArrayDataAccessService(20);
-        carBookingDao = new CarBookingFileDataAccessService("C:\\Users\\Lenovo\\Documents\\java training\\projects-workspace\\car-booking-cli\\data\\bookings.dat");
-
-        carService = new CarService(carDao,  carBookingDao);
-        carBookingService = new CarBookingService(carBookingDao);
-
-        Car honda =  new Car(UUID.randomUUID(), "hen-57883m-yjmemme", BigDecimal.TEN, Brand.HONDA, false);
-        Car toyota =  new Car(UUID.randomUUID(), "htoy-574783m-nndmmeme", new BigDecimal("12.00"), Brand.TOYOTA, false);
-        Car Tesla = new Car(UUID.randomUUID(), "tes-jej288828-nnjjdmue", new BigDecimal("15.00"), Brand.TESLA, true);
-
-        carService.addCar(honda);
-        carService.addCar(toyota);
-        carService.addCar(Tesla);
-
-        userService.addUser("James");
-        userService.addUser("John");
-
-    }
-
+    private static final String CARSFILEPATH = "data/cars.dat";
+    private static final String USERSFILEPATH = "data/users.dat";
+    private static final String BOOKINGSFILEPATH = "data/bookings.dat";
 
     static void main(String args[]) {
+        init();
+
         String options = """
                 Options menu:
                 [1] - Book Car
@@ -183,6 +163,44 @@ public class Main {
                     System.out.println("Invalid option");
             }
         }
+    }
+
+    private static void init() {
+        //userDao = new UserArrayDataAccessService(20);
+
+        userDao = new UserFileDataAccessService(USERSFILEPATH);
+        userService = new UserService(userDao);
+
+        //carDao = new CarArrayDataAccessService(20);
+        carDao = new CarFileDataAccessService(CARSFILEPATH);
+
+        //carBookingDao = new CarBookingArrayDataAccessService(20);
+        carBookingDao = new CarBookingFileDataAccessService(BOOKINGSFILEPATH);
+
+        carService = new CarService(carDao,  carBookingDao);
+        carBookingService = new CarBookingService(carBookingDao);
+        try {
+            if(Files.exists(Paths.get(CARSFILEPATH)) && Files.isRegularFile(Paths.get(CARSFILEPATH)) && Files.size(Paths.get(CARSFILEPATH)) == 0){
+                Car honda =  new Car(UUID.randomUUID(), "hen-57883m-yjmemme", BigDecimal.TEN, Brand.HONDA, false);
+                Car toyota =  new Car(UUID.randomUUID(), "htoy-574783m-nndmmeme", new BigDecimal("12.00"), Brand.TOYOTA, false);
+                Car Tesla = new Car(UUID.randomUUID(), "tes-jej288828-nnjjdmue", new BigDecimal("15.00"), Brand.TESLA, true);
+
+                carService.addCar(honda);
+                carService.addCar(toyota);
+                carService.addCar(Tesla);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            if(Files.exists(Paths.get(USERSFILEPATH)) && Files.isRegularFile(Paths.get(USERSFILEPATH)) && Files.size(Paths.get(USERSFILEPATH)) == 0) {
+                userService.addUser("John");
+                userService.addUser("James");
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
 

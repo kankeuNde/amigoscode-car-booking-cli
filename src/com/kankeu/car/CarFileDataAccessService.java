@@ -54,18 +54,15 @@ public class CarFileDataAccessService implements CarDao{
         Car[] cars =  readAll();
         for(int index = 0; index < cars.length; index++){
             if(cars[index].getId().equals(carId)){
-                remove(index);
+                for(int i = index; i < cars.length-1; i++){
+                    cars[i] = cars[i+1];
+                }
                 break;
             }
         }
+        writeAll(cars);
     }
 
-    private void remove(int index){
-        Car[] cars = readAll();
-        for(int i = index; i < cars.length-1; i++){
-            cars[i] = cars[i+1];
-        }
-    }
 
     private Car[] resize(Car[] cars, int capacity){
         Car[] newCars = new Car[capacity*2];
