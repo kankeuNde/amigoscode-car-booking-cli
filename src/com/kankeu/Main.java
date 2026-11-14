@@ -1,23 +1,17 @@
 package com.kankeu;
 
-import com.kankeu.booking.BookingStatus;
-import com.kankeu.booking.CarBooking;
-import com.kankeu.booking.CarBookingDao;
-import com.kankeu.booking.CarBookingService;
-import com.kankeu.car.Brand;
-import com.kankeu.car.Car;
-import com.kankeu.car.CarDao;
-import com.kankeu.car.CarService;
+import com.kankeu.booking.*;
+import com.kankeu.car.*;
 import com.kankeu.exceptions.CarNotFoundException;
 import com.kankeu.exceptions.UserNotFoundException;
-import com.kankeu.user.User;
-import com.kankeu.user.UserDao;
-import com.kankeu.user.UserService;
+import com.kankeu.user.*;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.Scanner;
 import java.util.UUID;
 
@@ -28,30 +22,13 @@ public class Main {
     private static UserDao userDao;
     private static CarBookingDao carBookingDao;
     private static CarDao carDao;
-
-    static{
-        userDao = new UserDao(20);
-        userService = new UserService(userDao);
-        carDao = new CarDao(20);
-        carBookingDao = new CarBookingDao(20);
-        carService = new CarService(carDao,  carBookingDao);
-        carBookingService = new CarBookingService(carBookingDao);
-
-        Car honda =  new Car(UUID.randomUUID(), "hen-57883m-yjmemme", BigDecimal.TEN, Brand.HONDA, false);
-        Car toyota =  new Car(UUID.randomUUID(), "htoy-574783m-nndmmeme", new BigDecimal("12.00"), Brand.TOYOTA, false);
-        Car Tesla = new Car(UUID.randomUUID(), "tes-jej288828-nnjjdmue", new BigDecimal("15.00"), Brand.TESLA, true);
-
-        carService.addCar(honda);
-        carService.addCar(toyota);
-        carService.addCar(Tesla);
-
-        userService.createUser("James");
-        userService.createUser("John");
-
-    }
-
+    private static final String CARSFILEPATH = "data/cars.dat";
+    private static final String USERSFILEPATH = "data/users.dat";
+    private static final String BOOKINGSFILEPATH = "data/bookings.dat";
 
     static void main(String args[]) {
+        init();
+
         String options = """
                 Options menu:
                 [1] - Book Car
@@ -80,7 +57,6 @@ public class Main {
 
                     System.out.println("Enter your user ID");
                     UUID userID = UUID.fromString(scanner.nextLine());
-                    //scanner.nextLine();
                     User user = null;
                     try {
                         user = userService.findByID(userID);
@@ -96,7 +72,6 @@ public class Main {
 
                     System.out.println("Enter your car selection number:");
                     UUID carID = UUID.fromString(scanner.nextLine());
-                    //scanner.nextLine();
                     Car car = null;
                     try {
                         car = carService.findByID(carID);
@@ -188,6 +163,44 @@ public class Main {
                     System.out.println("Invalid option");
             }
         }
+    }
+
+    private static void init() {
+        //userDao = new UserArrayDataAccessService(20);
+
+        userDao = new UserFileDataAccessService(USERSFILEPATH);
+        userService = new UserService(userDao);
+
+        //carDao = new CarArrayDataAccessService(20);
+        carDao = new CarFileDataAccessService(CARSFILEPATH);
+
+        //carBookingDao = new CarBookingArrayDataAccessService(20);
+        carBookingDao = new CarBookingFileDataAccessService(BOOKINGSFILEPATH);
+
+        carService = new CarService(carDao,  carBookingDao);
+        carBookingService = new CarBookingService(carBookingDao);
+        try {
+            if(Files.exists(Paths.get(CARSFILEPATH)) && Files.isRegularFile(Paths.get(CARSFILEPATH)) && Files.size(Paths.get(CARSFILEPATH)) == 0){
+                Car honda =  new Car(UUID.randomUUID(), "hen-57883m-yjmemme", BigDecimal.TEN, Brand.HONDA, false);
+                Car toyota =  new Car(UUID.randomUUID(), "htoy-574783m-nndmmeme", new BigDecimal("12.00"), Brand.TOYOTA, false);
+                Car Tesla = new Car(UUID.randomUUID(), "tes-jej288828-nnjjdmue", new BigDecimal("15.00"), Brand.TESLA, true);
+
+                carService.addCar(honda);
+                carService.addCar(toyota);
+                carService.addCar(Tesla);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            if(Files.exists(Paths.get(USERSFILEPATH)) && Files.isRegularFile(Paths.get(USERSFILEPATH)) && Files.size(Paths.get(USERSFILEPATH)) == 0) {
+                userService.addUser("John");
+                userService.addUser("James");
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
 
