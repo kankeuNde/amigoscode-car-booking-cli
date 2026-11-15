@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.UUID;
@@ -167,21 +168,22 @@ public class Main {
     }
 
     private static void init() {
-        //userDao = new UserArrayDataAccessService(20);
 
-        userDao = new UserFileDataAccessService(USERSFILEPATH);
+        userDao = new UserArrayDataAccessService(new ArrayList<User>());
+
+        //userDao = new UserFileDataAccessService(USERSFILEPATH);
         userService = new UserService(userDao);
 
-        //carDao = new CarArrayDataAccessService(20);
-        carDao = new CarFileDataAccessService(CARSFILEPATH);
+        carDao = new CarArrayDataAccessService(new ArrayList<Car>());
+        //carDao = new CarFileDataAccessService(CARSFILEPATH);
 
-        //carBookingDao = new CarBookingArrayDataAccessService(20);
-        carBookingDao = new CarBookingFileDataAccessService(BOOKINGSFILEPATH);
+        carBookingDao = new CarBookingArrayDataAccessService(new ArrayList<CarBooking>());
+        //carBookingDao = new CarBookingFileDataAccessService(BOOKINGSFILEPATH);
 
         carService = new CarService(carDao,  carBookingDao);
         carBookingService = new CarBookingService(carBookingDao);
         try {
-            if(Files.exists(Paths.get(CARSFILEPATH)) && Files.isRegularFile(Paths.get(CARSFILEPATH)) && Files.size(Paths.get(CARSFILEPATH)) == 0){
+            if((Files.exists(Paths.get(CARSFILEPATH)) && Files.isRegularFile(Paths.get(CARSFILEPATH)) && Files.size(Paths.get(CARSFILEPATH)) == 0) || carDao instanceof CarArrayDataAccessService){
                 Car honda =  new Car(UUID.randomUUID(), "hen-57883m-yjmemme", BigDecimal.TEN, Brand.HONDA, false);
                 Car toyota =  new Car(UUID.randomUUID(), "htoy-574783m-nndmmeme", new BigDecimal("12.00"), Brand.TOYOTA, false);
                 Car Tesla = new Car(UUID.randomUUID(), "tes-jej288828-nnjjdmue", new BigDecimal("15.00"), Brand.TESLA, true);
@@ -194,7 +196,7 @@ public class Main {
             throw new RuntimeException(e);
         }
         try {
-            if(Files.exists(Paths.get(USERSFILEPATH)) && Files.isRegularFile(Paths.get(USERSFILEPATH)) && Files.size(Paths.get(USERSFILEPATH)) == 0) {
+            if((Files.exists(Paths.get(USERSFILEPATH)) && Files.isRegularFile(Paths.get(USERSFILEPATH)) && Files.size(Paths.get(USERSFILEPATH)) == 0) || userDao instanceof UserArrayDataAccessService) {
                 userService.addUser("John");
                 userService.addUser("James");
             }
