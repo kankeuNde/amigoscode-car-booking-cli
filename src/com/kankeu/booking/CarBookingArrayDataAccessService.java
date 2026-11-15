@@ -3,31 +3,25 @@ package com.kankeu.booking;
 import com.kankeu.car.Car;
 import com.kankeu.exceptions.BookingNotFoundException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static com.kankeu.booking.BookingStatus.CANCELED;
 
 public class CarBookingArrayDataAccessService implements CarBookingDao {
-    private static CarBooking[]  carBookings;
-    private static int capacity;
-    private static int size;
+    private static List<CarBooking>  carBookings;
 
     public CarBookingArrayDataAccessService() {
     }
 
-    public CarBookingArrayDataAccessService(int initialCapacity){
-        capacity = initialCapacity;
-        carBookings = new CarBooking[capacity];
-        size = 0;
+    public CarBookingArrayDataAccessService(List<CarBooking> carBookings){
+        this.carBookings = carBookings;
     }
 
     @Override
     public void saveBooking(CarBooking carBooking){
-        if(size >= capacity){
-            carBookings = resize(capacity);
-        }
-        carBookings[size] = carBooking;
-        size++;
+        carBookings.add(carBooking);
     }
 
     @Override
@@ -46,23 +40,19 @@ public class CarBookingArrayDataAccessService implements CarBookingDao {
         CarBooking booking = null;
         try {
             booking = findBookingById(bookingId);
-            for(int i = 0; i< size; i++){
-                if(carBookings[i].equals(booking)){
-                    carBookings[i] = null;
-                }
-            }
+            carBookings.remove(booking);
         } catch (BookingNotFoundException e) {
             e.printStackTrace();
         }
 
     }
 
-    public Car[] getCarByBookingStatus(BookingStatus status){
-        Car[] cars = new Car[size];
+    public List<Car> getCarByBookingStatus(BookingStatus status){
+        List<Car> cars = new ArrayList<>();
         int j = 0;
-        for(int i=0; i<size; i++){
-            if(carBookings[i].getStatus().equals(status)){
-                cars[j++] = carBookings[i].getCar();
+        for(int i=0; i<carBookings.size(); i++){
+            if(carBookings.get(i).getStatus().equals(status)){
+                cars.add(carBookings.get(i).getCar());
             }
         }
         return cars;
@@ -70,7 +60,7 @@ public class CarBookingArrayDataAccessService implements CarBookingDao {
 
     @Override
     public void cancelBooking(UUID bookingId) {
-        CarBooking[] bookings = getBookings();
+        List<CarBooking> bookings = getBookings();
         for(CarBooking carBooking : bookings) {
             if(carBooking != null && carBooking.getId().equals(bookingId)) {
                 carBooking.setStatus(CANCELED);
@@ -80,16 +70,7 @@ public class CarBookingArrayDataAccessService implements CarBookingDao {
     }
 
     @Override
-    public CarBooking[] getBookings(){
+    public List<CarBooking> getBookings(){
         return carBookings;
-    }
-
-    private static CarBooking[] resize(int newCapacity){
-        capacity = newCapacity*2;
-        CarBooking[] newCarBookings = new CarBooking[capacity];
-        for(int i=0; i<size; i++){
-            newCarBookings[i] = carBookings[i];
-        }
-        return newCarBookings;
     }
 }

@@ -12,6 +12,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.UUID;
 
@@ -39,8 +41,8 @@ public class Main {
                 [6] - View Available Electric Cars
                 [7] - View All Users
                 [8] - Exit""";
-        CarBooking[] allBookings;
-        Car[] availableCars;
+        List<CarBooking> allBookings;
+        List<Car> availableCars;
         Scanner scanner  = new Scanner(System.in);
         while(true ){
             System.out.println(options);
@@ -48,7 +50,7 @@ public class Main {
             scanner.nextLine();
             switch(option){
                 case 1:
-                    User[] users1 = userService.getAllUsers();
+                    List<User> users1 = userService.getAllUsers();
                     for(User user : users1){
                         if(user!= null)
                             System.out.println(user);
@@ -64,7 +66,7 @@ public class Main {
                         e.printStackTrace();
                     }
 
-                    Car[] allCars = carService.getAllCars();
+                    List<Car> allCars = carService.getAllCars();
                     for (Car car : allCars) {
                         if(car != null)
                             System.out.println(car);
@@ -103,7 +105,7 @@ public class Main {
                     System.out.println("User Bookings:");
                     System.out.print("Enter your user ID:");
                     UUID uuid = UUID.fromString(scanner.nextLine());
-                    Car[] bookedCars = null;
+                    List<Car> bookedCars = null;
                     if(userService.exists(uuid))
                         bookedCars = carBookingService.userBookedCars(uuid);
                     else {
@@ -138,7 +140,7 @@ public class Main {
                     break;
                 case 6:
                     System.out.println("Available Electric Cars");
-                    Car[] availableElectricCars = null;
+                    List<Car> availableElectricCars = null;
                     try {
                         availableElectricCars = carService.getAvailableElectricCars();
                     } catch (CarNotFoundException e) {
@@ -150,10 +152,10 @@ public class Main {
                     break;
                 case 7:
                     System.out.println("List of users: ");
-                    User[] users = userService.getAllUsers();
+                    List<User> users = userService.getAllUsers();
                     for(User user1 : users){
                         if(user1 != null)
-                            System.out.println(" - " + user1.getName());
+                            System.out.println(user1.getId() + " - " + user1.getName());
                     }
                     break;
                 case 8:
@@ -166,21 +168,22 @@ public class Main {
     }
 
     private static void init() {
-        //userDao = new UserArrayDataAccessService(20);
 
-        userDao = new UserFileDataAccessService(USERSFILEPATH);
+        userDao = new UserArrayDataAccessService(new ArrayList<User>());
+
+        //userDao = new UserFileDataAccessService(USERSFILEPATH);
         userService = new UserService(userDao);
 
-        //carDao = new CarArrayDataAccessService(20);
-        carDao = new CarFileDataAccessService(CARSFILEPATH);
+        carDao = new CarArrayDataAccessService(new ArrayList<Car>());
+        //carDao = new CarFileDataAccessService(CARSFILEPATH);
 
-        //carBookingDao = new CarBookingArrayDataAccessService(20);
-        carBookingDao = new CarBookingFileDataAccessService(BOOKINGSFILEPATH);
+        carBookingDao = new CarBookingArrayDataAccessService(new ArrayList<CarBooking>());
+        //carBookingDao = new CarBookingFileDataAccessService(BOOKINGSFILEPATH);
 
         carService = new CarService(carDao,  carBookingDao);
         carBookingService = new CarBookingService(carBookingDao);
         try {
-            if(Files.exists(Paths.get(CARSFILEPATH)) && Files.isRegularFile(Paths.get(CARSFILEPATH)) && Files.size(Paths.get(CARSFILEPATH)) == 0){
+            if((Files.exists(Paths.get(CARSFILEPATH)) && Files.isRegularFile(Paths.get(CARSFILEPATH)) && Files.size(Paths.get(CARSFILEPATH)) == 0) || carDao instanceof CarArrayDataAccessService){
                 Car honda =  new Car(UUID.randomUUID(), "hen-57883m-yjmemme", BigDecimal.TEN, Brand.HONDA, false);
                 Car toyota =  new Car(UUID.randomUUID(), "htoy-574783m-nndmmeme", new BigDecimal("12.00"), Brand.TOYOTA, false);
                 Car Tesla = new Car(UUID.randomUUID(), "tes-jej288828-nnjjdmue", new BigDecimal("15.00"), Brand.TESLA, true);
@@ -193,7 +196,7 @@ public class Main {
             throw new RuntimeException(e);
         }
         try {
-            if(Files.exists(Paths.get(USERSFILEPATH)) && Files.isRegularFile(Paths.get(USERSFILEPATH)) && Files.size(Paths.get(USERSFILEPATH)) == 0) {
+            if((Files.exists(Paths.get(USERSFILEPATH)) && Files.isRegularFile(Paths.get(USERSFILEPATH)) && Files.size(Paths.get(USERSFILEPATH)) == 0) || userDao instanceof UserArrayDataAccessService) {
                 userService.addUser("John");
                 userService.addUser("James");
             }

@@ -2,25 +2,19 @@ package com.kankeu.user;
 
 import com.kankeu.exceptions.UserNotFoundException;
 
+import java.util.List;
 import java.util.UUID;
 
 public class UserArrayDataAccessService implements UserDao {
-    private static User[] users;
-    private static int size;
-    private static int capacity;
+    private static List<User> users;
 
-    public UserArrayDataAccessService(int initialCapacity) {
-        capacity = initialCapacity;
-        users = new User[capacity];
-        size = 0;
+    public UserArrayDataAccessService(List<User> users) {
+        this.users = users;
     }
 
     @Override
     public User createUser(User user){
-        if(size == capacity){
-            users = resize(capacity);
-        }
-        users[size++] = user;
+        users.add(user);
         return user;
     }
 
@@ -41,8 +35,8 @@ public class UserArrayDataAccessService implements UserDao {
     @Override
     public User updateUser(User newUser){
         int index = this.getUserIndex(newUser);
-        users[index] = newUser;
-        return users[index];
+        users.set(index, newUser);
+        return users.get(index);
     }
 
     @Override
@@ -51,10 +45,7 @@ public class UserArrayDataAccessService implements UserDao {
         try {
             user = this.findUserById(id);
             int index = this.getUserIndex(user);
-            for(int i = index; i< size; i++){
-                users[i] = users[i+1];
-            }
-            size--;
+            users.remove(index);
         } catch (UserNotFoundException e) {
             e.printStackTrace();
         }
@@ -62,17 +53,8 @@ public class UserArrayDataAccessService implements UserDao {
     }
 
     @Override
-    public User[] getUsers(){
+    public List<User> getUsers(){
         return users;
-    }
-
-    private static User[] resize(int capacity){
-        capacity *= 2;
-        User[] newUsers = new User[capacity];
-        for(int i = 0; i < size; i++){
-            newUsers[i] = users[i];
-        }
-        return  newUsers;
     }
 
     /**
@@ -81,8 +63,8 @@ public class UserArrayDataAccessService implements UserDao {
      * @return the user index or -1 if not found
      */
     private int getUserIndex(User user){
-        for(int i=0; i<users.length; i++){
-            if(users[i].equals(user)){
+        for(int i=0; i<users.size(); i++){
+            if(users.get(i).equals(user)){
                 return i;
             }
         }
