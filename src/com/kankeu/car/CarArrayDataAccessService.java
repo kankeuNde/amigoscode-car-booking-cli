@@ -1,28 +1,22 @@
 package com.kankeu.car;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public class CarArrayDataAccessService implements CarDao{
-    private static int capacity;
-    private static int size;
-    private static Car[] cars;
+    private static List<Car> cars;
 
     public CarArrayDataAccessService() {
     }
 
-    public CarArrayDataAccessService(int initialCapacity) {
-        capacity = initialCapacity;
-        cars = new Car[capacity];
-        size = 0;
+    public CarArrayDataAccessService(List<Car> cars) {
+        this.cars = cars;
     }
 
     @Override
     public Car createCar(Car car){
-        if(size >= capacity){
-            cars = resize(capacity);
-        }
-        cars[size++] = car;
+        cars.add(car);
         return car;
     }
 
@@ -32,8 +26,8 @@ public class CarArrayDataAccessService implements CarDao{
         if(index == -1){
             throw new RuntimeException("Car %s not found.".formatted(car));
         }
-        cars[index] = car;
-        return  cars[index];
+        cars.set(index, car);
+        return  cars.get(index);
     }
 
     @Override
@@ -42,14 +36,11 @@ public class CarArrayDataAccessService implements CarDao{
         if(index == -1){
             throw new RuntimeException("Car %s not found.".formatted(carId));
         }
-        for(int i = index; i < size; i++){
-            cars[i] = cars[i+1];
-        }
-        size--;
+        cars.remove(index);
     }
 
     @Override
-    public Car[] getCars(){
+    public List<Car> getCars(){
         return cars;
     }
 
@@ -65,20 +56,12 @@ public class CarArrayDataAccessService implements CarDao{
 
 
     public int findCarIndex(UUID id){
-        for(int i=0; i<size; i++){
-            if(id.equals(cars[i].getId())){
+        for(int i=0; i<cars.size(); i++){
+            if(id.equals(cars.get(i).getId())){
                 return i;
             }
         }
         return -1;
     }
 
-    private Car[] resize(int newCapacity) {
-        capacity *= 2;
-        Car[] newCars = new Car[capacity];
-        for(int i = 0; i < size; i++){
-            newCars[i] = cars[i];
-        }
-        return  newCars;
-    }
 }

@@ -4,8 +4,8 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+
 
 public class CarFileDataAccessService implements CarDao{
     private final String filePath;
@@ -13,13 +13,13 @@ public class CarFileDataAccessService implements CarDao{
         this.filePath = filePath;
     }
     @Override
-    public Car[] getCars() {
+    public List<Car> getCars() {
         return readAll();
     }
 
     @Override
     public Optional<Car> findCarById(UUID carId) {
-        Car[] cars = readAll();
+        List<Car> cars = readAll();
         for (Car car : cars) {
             if (car.getId().equals(carId)) {
                 return Optional.of(car);
@@ -30,18 +30,18 @@ public class CarFileDataAccessService implements CarDao{
 
     @Override
     public Car createCar(Car car) {
-        Car[] cars = readAll();
-        Car[] updated = addCar(cars, car);
-        writeAll(updated);
+        List<Car> cars = readAll();
+        cars.add(car);
+        writeAll(cars);
         return car;
     }
 
     @Override
     public Car updateCar(Car car) {
-        Car[] cars = readAll();
-        for(int index = 0; index < cars.length; index++){
-            if(cars[index].getId().equals(car.getId())){
-                cars[index] = car;
+        List<Car> cars = readAll();
+        for(int index = 0; index < cars.size(); index++){
+            if(cars.get(index).getId().equals(car.getId())){
+                cars.set(index, car);
                 break;
             }
         }
@@ -51,51 +51,33 @@ public class CarFileDataAccessService implements CarDao{
 
     @Override
     public void deleteCar(UUID carId) {
-        Car[] cars =  readAll();
-        for(int index = 0; index < cars.length; index++){
-            if(cars[index].getId().equals(carId)){
-                for(int i = index; i < cars.length-1; i++){
-                    cars[i] = cars[i+1];
-                }
+        List<Car> cars =  readAll();
+        for(int index = 0; index < cars.size(); index++){
+            if(cars.get(index).getId().equals(carId)){
+                cars.remove(index);
                 break;
             }
         }
         writeAll(cars);
     }
 
-
-    private Car[] resize(Car[] cars, int capacity){
-        Car[] newCars = new Car[capacity*2];
-        for(int i = 0; i < cars.length; i++){
-            newCars[i] = cars[i];
-        }
-        return newCars;
-    }
-
-    private Car[] addCar(Car[] cars, Car car){
-        Car[] result = new Car[cars.length+1];
-        for(int i = 0; i < cars.length; i++){
-            result[i] = cars[i];
-        }
-        result[cars.length] = car;
-        return result;
-    }
-
-    private Car[] readAll(){
+    private List<Car> readAll(){
         Path path = Path.of(filePath);
         if(!Files.exists(path) ||  !Files.isReadable(path) || isEmpty(path)){
-            return new Car[0]; // first run: no cars yet
+            //return Collections.emptyList(); // first run: no cars yet
+            return new ArrayList<>();
         }
         try(ObjectInputStream ois = new ObjectInputStream(
                 new BufferedInputStream(new FileInputStream(filePath)))){
-            return (Car[])ois.readObject();
+            List<Car> cars = (List<Car>)ois.readObject();
+            return cars;
         }catch(IOException | ClassNotFoundException e){
             //Do NOT continue: overwritting now would destroy the existing data
             throw new RuntimeException("Cannot read car file: " + filePath, e);
         }
     }
 
-    private void writeAll(Car[] cars){
+    private void writeAll(List<Car> cars){
         Path path = Path.of(filePath);
         Path tmp = path.resolveSibling(path.getFileName() + ".tmp");
         try{

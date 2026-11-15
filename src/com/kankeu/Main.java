@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Scanner;
 import java.util.UUID;
 
@@ -39,8 +40,8 @@ public class Main {
                 [6] - View Available Electric Cars
                 [7] - View All Users
                 [8] - Exit""";
-        CarBooking[] allBookings;
-        Car[] availableCars;
+        List<CarBooking> allBookings;
+        List<Car> availableCars;
         Scanner scanner  = new Scanner(System.in);
         while(true ){
             System.out.println(options);
@@ -48,7 +49,7 @@ public class Main {
             scanner.nextLine();
             switch(option){
                 case 1:
-                    User[] users1 = userService.getAllUsers();
+                    List<User> users1 = userService.getAllUsers();
                     for(User user : users1){
                         if(user!= null)
                             System.out.println(user);
@@ -64,7 +65,7 @@ public class Main {
                         e.printStackTrace();
                     }
 
-                    Car[] allCars = carService.getAllCars();
+                    List<Car> allCars = carService.getAllCars();
                     for (Car car : allCars) {
                         if(car != null)
                             System.out.println(car);
@@ -103,7 +104,7 @@ public class Main {
                     System.out.println("User Bookings:");
                     System.out.print("Enter your user ID:");
                     UUID uuid = UUID.fromString(scanner.nextLine());
-                    Car[] bookedCars = null;
+                    List<Car> bookedCars = null;
                     if(userService.exists(uuid))
                         bookedCars = carBookingService.userBookedCars(uuid);
                     else {
@@ -138,7 +139,7 @@ public class Main {
                     break;
                 case 6:
                     System.out.println("Available Electric Cars");
-                    Car[] availableElectricCars = null;
+                    List<Car> availableElectricCars = null;
                     try {
                         availableElectricCars = carService.getAvailableElectricCars();
                     } catch (CarNotFoundException e) {
@@ -150,10 +151,10 @@ public class Main {
                     break;
                 case 7:
                     System.out.println("List of users: ");
-                    User[] users = userService.getAllUsers();
+                    List<User> users = userService.getAllUsers();
                     for(User user1 : users){
                         if(user1 != null)
-                            System.out.println(" - " + user1.getName());
+                            System.out.println(user1.getId() + " - " + user1.getName());
                     }
                     break;
                 case 8:

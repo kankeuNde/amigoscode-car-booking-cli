@@ -2,6 +2,7 @@ package com.kankeu.user;
 
 import com.kankeu.exceptions.UserNotFoundException;
 
+import java.util.List;
 import java.util.UUID;
 
 public class UserService {
@@ -20,7 +21,7 @@ public class UserService {
         return userDao.createUser(user);
     }
 
-    public User[] getAllUsers(){
+    public List<User> getAllUsers(){
         return userDao.getUsers();
     }
 

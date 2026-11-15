@@ -7,8 +7,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.Arrays;
-import java.util.UUID;
+import java.util.*;
 
 import static com.kankeu.booking.BookingStatus.CANCELED;
 
@@ -20,13 +19,13 @@ public class CarBookingFileDataAccessService implements CarBookingDao{
     }
 
     @Override
-    public CarBooking[] getBookings() {
+    public List<CarBooking> getBookings() {
         return readAll();
     }
 
     @Override
     public CarBooking findBookingById(UUID bookingId) throws BookingNotFoundException {
-        CarBooking[] carBookings = readAll();
+        List<CarBooking> carBookings = readAll();
         for(CarBooking carBooking:carBookings){
             if(carBooking.getId().equals(bookingId)){
                 return carBooking;
@@ -37,17 +36,12 @@ public class CarBookingFileDataAccessService implements CarBookingDao{
 
     @Override
     public void saveBooking(CarBooking carBooking) {
-        CarBooking[] carBookings = readAll();
-        CarBooking[] updatedCarBookings = addCarBooking(carBookings, carBooking);
-        writeAll(updatedCarBookings);
+        List<CarBooking> carBookings = readAll();
+        carBookings.add(carBooking);
+        writeAll(carBookings);
     }
 
-    public void updateBookins(CarBooking[] bookings) {
-        writeAll(bookings);
-    }
-
-
-    private void writeAll(CarBooking[] carBookings){
+    private void writeAll(List<CarBooking> carBookings){
         Path path = Path.of(filePath);
         Path tmp = path.resolveSibling(path.getFileName() + ".tmp");
         try {
@@ -65,23 +59,16 @@ public class CarBookingFileDataAccessService implements CarBookingDao{
         }
     }
 
-    private CarBooking[] addCarBooking(CarBooking[] bookings, CarBooking carBooking){
-        CarBooking[] updatedBookings = new CarBooking[bookings.length+1];
-        for(int i=0; i<bookings.length; i++){
-            updatedBookings[i] = bookings[i];
-        }
-        updatedBookings[bookings.length] = carBooking;
-        return updatedBookings;
-    }
-
-    private CarBooking[] readAll(){
+    private List<CarBooking> readAll(){
         Path path = Path.of(filePath);
         if(!Files.exists(path) || !Files.isReadable(path) || isEmpty(path)){
-            return new CarBooking[0]; // first run: no cars yet
+            //return Collections.emptyList(); // first run: no cars yet
+            return new ArrayList<>();
         }
         try(ObjectInputStream ois = new ObjectInputStream(
                 new BufferedInputStream(new FileInputStream(filePath)))){
-            return (CarBooking[])ois.readObject();
+            List<CarBooking> carBookings = (List<CarBooking>)ois.readObject();
+            return carBookings;
         }catch(IOException | ClassNotFoundException e){
             //Do NOT continue: overwriting now would destroy the existing data
             throw new RuntimeException("Cannot read carbooking file: " + filePath, e);
@@ -98,12 +85,10 @@ public class CarBookingFileDataAccessService implements CarBookingDao{
 
     @Override
     public void deleteBooking(UUID bookingId) {
-        CarBooking[]  bookings = readAll();
-        for(int index = 0; index < bookings.length; index++){
-            if(bookings[index].getId().equals(bookingId)){
-                for(int i=index; i<bookings.length-1; i++){
-                    bookings[i] = bookings[i+1];
-                }
+        List<CarBooking>  bookings = readAll();
+        for(int index = 0; index < bookings.size(); index++){
+            if(bookings.get(index).getId().equals(bookingId)){
+                bookings.remove(index);
                 break;
             }
         }
@@ -112,21 +97,21 @@ public class CarBookingFileDataAccessService implements CarBookingDao{
 
 
     @Override
-    public Car[] getCarByBookingStatus(BookingStatus bookingStatus) {
-        CarBooking[] bookings = readAll();
-        Car[] result = new Car[bookings.length];
+    public List<Car> getCarByBookingStatus(BookingStatus bookingStatus) {
+        List<CarBooking> bookings = readAll();
+        List<Car> cars = new ArrayList<>();
         int j = 0;
-        for(int i=0; i<bookings.length; i++){
-            if(bookings[i].getStatus().equals(bookingStatus)){
-                result[j++] = bookings[i].getCar();
+        for(int i=0; i<bookings.size(); i++){
+            if(bookings.get(i).getStatus().equals(bookingStatus)){
+                cars.add(bookings.get(i).getCar());
             }
         }
-        return Arrays.copyOf(result, j);
+        return cars;
     }
 
     @Override
     public void cancelBooking(UUID bookingId) {
-        CarBooking[] bookings = getBookings();
+        List<CarBooking> bookings = getBookings();
         for(CarBooking carBooking : bookings) {
             if(carBooking != null && carBooking.getId().equals(bookingId)) {
                 carBooking.setStatus(CANCELED);

@@ -7,7 +7,8 @@ import com.kankeu.user.User;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static com.kankeu.booking.BookingStatus.CANCELED;
@@ -19,12 +20,12 @@ public class CarBookingService {
         this.carBookingDao = carBookingDao;
     }
 
-    public CarBooking[]  getAllBookings(){
+    public List<CarBooking> getAllBookings(){
         return carBookingDao.getBookings();
     }
 
 
-    public boolean isAvailable(CarBooking[] allBookings, Car car) {
+    public boolean isAvailable(List<CarBooking> allBookings, Car car) {
         for(CarBooking carBooking : allBookings) {
             if(carBooking != null && carBooking.getCar().equals(car) && carBooking.getStatus().equals(BookingStatus.ACTIVE)) {
                 return false;
@@ -47,7 +48,7 @@ public class CarBookingService {
     }
 
     public void delete(UUID id) {
-        CarBooking[] bookings = carBookingDao.getBookings();
+        List<CarBooking> bookings = carBookingDao.getBookings();
         for(CarBooking carBooking : bookings) {
             if(carBooking != null && carBooking.getId().equals(id)) {
                 carBooking.setStatus(CANCELED);
@@ -64,16 +65,16 @@ public class CarBookingService {
         return  false;
     }
 
-    public Car[] userBookedCars(UUID id) {
-        CarBooking[] allCarBookings = carBookingDao.getBookings();
-        Car[] cars = new Car[allCarBookings.length];
+    public List<Car> userBookedCars(UUID id) {
+        List<CarBooking> allCarBookings = carBookingDao.getBookings();
+        List<Car> cars = new ArrayList<>();
         int index = 0;
         for(CarBooking carBooking : allCarBookings) {
             if(carBooking != null && carBooking.getUser().getId().equals(id)) {
-                cars[index++] = carBooking.getCar();
+                cars.add(carBooking.getCar());
             }
         }
-        return Arrays.copyOf(cars, index);
+        return cars;
     }
 
     public CarBooking bookCar(LocalDate startDate, LocalDate endDate, Car car, User user) {
@@ -81,7 +82,7 @@ public class CarBookingService {
             System.out.println("Start date must not be before today and must be before end date");
             return null;
         }
-        CarBooking[] allBookings = getAllBookings();
+        List<CarBooking> allBookings = getAllBookings();
         if(!isAvailable(allBookings, car)) {
             System.out.println("The chosen car is not available.");
             return null;

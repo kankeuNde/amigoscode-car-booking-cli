@@ -6,6 +6,9 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 public class UserFileDataAccessService implements UserDao{
@@ -15,13 +18,13 @@ public class UserFileDataAccessService implements UserDao{
     }
 
     @Override
-    public User[] getUsers() {
+    public List<User> getUsers() {
         return readAll();
     }
 
     @Override
     public User findUserById(UUID userId) throws UserNotFoundException {
-        User[] users = readAll();
+        List<User> users = readAll();
         for(User user : users){
             if(user.getId().equals(userId)){
                 return user;
@@ -32,18 +35,18 @@ public class UserFileDataAccessService implements UserDao{
 
     @Override
     public User createUser(User user) {
-        User[] users = readAll();
-        User[] updated = addUser(users, user);
-        writeAll(updated);
+        List<User> users = readAll();
+        users.add(user);
+        writeAll(users);
         return user;
     }
 
     @Override
     public User updateUser(User user) {
-        User[] users = readAll();
-        for(int index = 0; index < users.length; index++){
-            if(users[index].getId().equals(user.getId())){
-                users[index] = user;
+        List<User> users = readAll();
+        for(int index = 0; index < users.size(); index++){
+            if(users.get(index).getId().equals(user.getId())){
+                users.set(index, user);
                 break;
             }
         }
@@ -53,19 +56,17 @@ public class UserFileDataAccessService implements UserDao{
 
     @Override
     public void deleteUser(UUID userId) {
-        User[] users = readAll();
-        for(int index = 0; index < users.length; index++){
-            if(users[index].getId().equals(userId)){
-                for(int i=index; i<users.length-1; i++){
-                    users[i] = users[i+1];
-                }
+        List<User> users = readAll();
+        for(int index = 0; index < users.size(); index++){
+            if(users.get(index).getId().equals(userId)){
+                users.remove(index);
                 break;
             }
         }
         writeAll(users);
     }
 
-    private void writeAll(User[] users){
+    private void writeAll(List<User> users){
         Path path = Path.of(filePath);
         Path tmp = path.resolveSibling(path.getFileName() + ".tmp");
         try {
@@ -83,23 +84,17 @@ public class UserFileDataAccessService implements UserDao{
             }
         }
 
-    private User[] addUser(User[] users, User user){
-        User[] updated = new User[users.length+1];
-        for(int i=0; i<users.length; i++){
-            updated[i] = users[i];
-        }
-        updated[users.length] = user;
-        return updated;
-    }
 
-    private User[] readAll(){
+    private List<User> readAll(){
         Path path = Path.of(filePath);
         if(!Files.exists(path) ||  !Files.isReadable(path) || isEmpty(path)){
-            return new User[0]; // first run: no cars yet
+            //return Collections.emptyList(); // first run: no cars yet
+            return new ArrayList<>();
         }
         try(ObjectInputStream ois = new ObjectInputStream(
                 new BufferedInputStream(new FileInputStream(filePath)))){
-            return (User[])ois.readObject();
+            List<User> users = (List<User>)ois.readObject();
+            return users;
         }catch(IOException | ClassNotFoundException e){
             //Do NOT continue: overwriting now would destroy the existing data
             throw new RuntimeException("Cannot read user file: " + filePath, e);
